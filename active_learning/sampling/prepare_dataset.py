@@ -874,7 +874,7 @@ def highlight_missing_annotations(annot_folder, cur_annot_diff):
             cur_annot_diff = len(diff_img_annot)
             print("")
     return diff_img_annot, cur_annot_diff
-    
+
 
 def check_json_presence(config, imgdir, dataset, name, cfg=[]):
     print("")
@@ -1027,7 +1027,7 @@ def check_json_presence(config, imgdir, dataset, name, cfg=[]):
             shutil.rmtree(annot_folder)
 
 
-def write_labelme_annotations(write_dir, basename, class_names, masks, height, width):
+def write_labelme_annotations(write_dir, basename, class_names, masks, height, width, downsample=10):
     masks = masks.astype(np.uint8)
 
     if masks.any():
@@ -1060,6 +1060,9 @@ def write_labelme_annotations(write_dir, basename, class_names, masks, height, w
                         x = [int(segm[idx][0]) for idx in range(len(segm))]
                         y = [int(segm[idx][1]) for idx in range(len(segm))]
                         xy = list(zip(x, y))
+                        
+                        # downsampling
+                        xy = xy[::downsample]
 
                         writedata['shapes'].append({
                             'label': class_name,
@@ -1079,6 +1082,8 @@ def write_labelme_annotations(write_dir, basename, class_names, masks, height, w
                             x = [int(segm[idx][0]) for idx in range(len(segm))]
                             y = [int(segm[idx][1]) for idx in range(len(segm))]
                             xy = list(zip(x, y))
+
+                            xy = xy[::downsample]
 
                             writedata['shapes'].append({
                                 'label': class_name,
@@ -1394,7 +1399,7 @@ def calculate_iterations(config, dataset_dicts_train):
         max_iterations = config['train_iterations_base'] + ((div_factor - 1) * config['train_iterations_step_size'])
     steps = [int(s * max_iterations) for s in config['step_ratios']]
     return int(max_iterations), steps
-    
+
 
 def prepare_all_dataset_randomly(rootdir, imgdir, classes, train_val_test_split, initial_datasize):
     rename_xml_files(imgdir)
